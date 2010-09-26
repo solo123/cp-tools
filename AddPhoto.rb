@@ -9,7 +9,10 @@ class PhotoTools
       end
       @path = path
       @count = 0
+		@photo_count = 0
     end
+    @debug = (__FILE__ == $0)
+    @dbg = @debug ? '(test)' : '>>'
   end
 
   def do_process
@@ -24,7 +27,7 @@ class PhotoTools
       @catalog = cat
       puts "CAT: #{@catalog}"
 
-      @product_tool.set_parent_brand(cat)
+      @product_tool.set_parent_brand(cat) if !@debug
       Dir.entries(@path + '/' + cat).each do |brand|
         @brand = brand
         process_brand if !brand.match(/\./)
@@ -42,19 +45,17 @@ class PhotoTools
   end
 
   def process_model
+    p = @product_tool.find_or_create(@brand, @model) if !@debug
     Dir[@path + '/' + @catalog + '/' + @brand + '/' + @model + '/*.jpg'].each do |f|
-      #exit if (@count = @count + 1) > 10
-
-      #lazy load, can't use: if ! defined? Product
-
-      # import to spree!
-      p = @product_tool.find_or_create(@brand, @model)
-      begin
-        img = Image.create(:attachment => File.open(f), :viewable => p)
-      rescue
-        puts "  Invalid image:" << f
-      end
-      puts " Add:" << @brand << '/' << @model << " -- img:" << f
+		if !@debug
+		   begin
+		     img = Image.create(:attachment => File.open(f), :viewable => p)
+		   rescue
+		     puts "  Invalid image:" << f
+		   end
+	   end
+		@photo_count = @photo_count + 1
+      puts @dbg + @photo_count.to_s + "." + @brand + '/' + @model + " \t-- img:" + f
     end
   end
 end
