@@ -72,7 +72,8 @@ def retrieve_data
       m.save
     end
     puts op + m.to_s
-  end  
+  end
+  msgs.count
 end
 
 def send_sms
@@ -89,6 +90,18 @@ def send_sms
     puts '----------'
   end
 end
+def send_sms_by_hyt
+  Msg.all(:conditions => 'status=0 and msg_type="SMS"').each do |msg|
+    @@sms.send(msg.address, msg.msg_body)
+
+    msg.status = 1
+    msg.save!
+    puts msg.address + ": " + msg.msg_body
+    puts msg.to_s
+    puts '----------'
+  end
+end
+
 
 def update_status
   ids1 = []
@@ -102,14 +115,60 @@ def update_status
 end
 
 def get_balance
-  puts @@sms.balance
+  puts 'Balace: ' + @@sms.balance.to_s
 end
+
+
+
+def quit?
+  begin
+    # See if a 'Q' has been typed yet
+    while c = STDIN.read_nonblock(1)
+      return true if c == 'Q' or c == 'q'
+    end
+    # No 'Q' found
+    false
+  rescue Errno::EINTR
+    puts "Well, your device seems a little slow..."
+    false
+  rescue Errno::EAGAIN
+    # nothing was ready to be read
+    false
+  rescue EOFError
+    # quit on the end of the input stream
+    # (user hit CTRL-D)
+    puts "Who hit CTRL-D, really?"
+    true
+  end
+end
+
+def auto_run
+  i = 0
+  puts "\nPress Q<enter> to Quit."
+  loop do
+    i = i + 1
+    print i.to_s + ', '
+    STDOUT.flush
+    break if quit?
+
+    if retrieve_data > 0
+      update_status
+      send_sms_by_hyt
+      update_status
+      get_balance
+    end
+    sleep 60
+  end
+end
+
+
+
 
 @@base_url = 'http://www.coolpur.com/etl/'
 @@sms = Sms.new
 while 1 do
   system('clear')
-  print 'R:read messages, S:send, U:update status, B:balance, Q:quit'
+  print 'R:read messages, S:send, U:update status, B:balance, A:auto, Q:quit'
   cmd = gets.chomp.upcase[0]
 
   exit if cmd == ?Q
@@ -118,6 +177,7 @@ while 1 do
   send_sms if cmd == ?S
   update_status if cmd == ?U
   get_balance if cmd == ?B
+  auto_run if cmd == ?A
 
   puts "\n-----------------\nPress ENTER to continue."
   gets
