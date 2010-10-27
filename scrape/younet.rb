@@ -134,11 +134,9 @@ def parse_mobile(brand, url)
   end
 
   fs = []
-  doc.search("div[@class='function-icon']/ul/li/a").each do |fn|
-    t = @conv.iconv(fn.attributes['rel'])
-    pos = t.index("：")
-    t = t[3..pos-1]
-    fs << t
+  doc.search('.function-icon/ul/li/a/img').each do |img|
+    m = /\/(\d+).jpg$/.match(img['src'])
+    fs << m[1] if m
   end
   mobile.functions = fs.join(',')
   mobile.description = doc.search('.parameters-box')[0].inner_html

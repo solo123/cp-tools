@@ -101,7 +101,17 @@ def send_sms_by_hyt
     puts '----------'
   end
 end
+def send_sms_by_cm
+  Msg.all(:conditions => 'status=0 and msg_type="SMS"').each do |msg|
+    send_by_cm(msg.address, msg.msg_body)
 
+    msg.status = 1
+    msg.save!
+    puts msg.address + ": " + msg.msg_body
+    puts msg.to_s
+    puts '----------'
+  end
+end
 
 def update_status
   ids1 = []
@@ -157,10 +167,26 @@ def auto_run
       update_status
       get_balance
     end
-    sleep 60
+    sleep 15
   end
 end
+def auto_run_cm
+  i = 0
+  puts "\nPress Q<enter> to Quit."
+  loop do
+    i = i + 1
+    print i.to_s + ', '
+    STDOUT.flush
+    break if quit?
 
+    if retrieve_data > 0
+      update_status
+      send_sms_by_cm
+      update_status
+    end
+    sleep 15
+  end
+end
 
 
 
@@ -168,7 +194,7 @@ end
 @@sms = Sms.new
 while 1 do
   system('clear')
-  print 'R:read messages, S:send, U:update status, B:balance, A:auto, Q:quit'
+  print 'R:read messages, S:send, U:update status, B:balance, A:auto, C:auto(CM), Q:quit'
   cmd = gets.chomp.upcase[0]
 
   exit if cmd == ?Q
@@ -178,6 +204,7 @@ while 1 do
   update_status if cmd == ?U
   get_balance if cmd == ?B
   auto_run if cmd == ?A
+  auto_run_cm if cmd == ?C
 
   puts "\n-----------------\nPress ENTER to continue."
   gets

@@ -65,20 +65,24 @@ def parse_brand(brand, url)
 end
 
 def parse_mobile(brand, url)
+  begin
   @count = @count + 1
   puts @count.to_s + " Product: " + url
 
 	doc = ( Hpricot(open(url)) rescue '' )
-  title = @conv.iconv(doc.search("div[@class='inner-header']/h1")[0].inner_text)
+  title = @conv.iconv(doc.search(".inner-header/h1")[0].inner_text)
   model = /(\w+)\s(.*)/.match(title)[2]
 
   pic = doc.search(".phone-img/img")[0].attributes['src']
   save_pic(brand, model, '0.jpg', pic)
+  rescue
+    puts 'ERROR: ' + url
+  end
 end
 
 def save_pic(brand, model, filename, url)
   create_path(brand, model)
-  open(@base_dir + '/' + brand + '/' + model + '/' + filename,'wb').write(open(url).read)
+  (open(@base_dir + '/' + brand + '/' + model + '/' + filename,'wb').write(open(url).read) rescue puts "ERROR> #{brand}/#{model}, #{url}" )
 end
 
 def create_path(brand, model)
