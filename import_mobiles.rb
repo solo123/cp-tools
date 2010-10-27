@@ -33,7 +33,7 @@ end
 
 def update_properties(product, mobile)
   @props ||= [
-    ['screen','屏幕'], ['color','颜色'], ['standard','标配'],
+    ['screen','屏幕'], ['color','颜色'], ['standard','标配'], ['os','操作系统'],
     ['market_price','零售价'], ['wholesale_price','批发价'],
     ['listing_date','上市日期'], ['frequency','频率'], ['size','尺寸'],
     ['cpu','CPU'], ['memory','内存'], ['talk_time','通话时长'], ['standby_time','待机时长']
@@ -59,7 +59,6 @@ def update_taxons(product, mobile)
   mobile.system.strip.split('/').each    { |taxon| add_taxon(product, taxon, '制式') }    if mobile.system && !mobile.system.strip.empty?
   mobile.functions.strip.split(',').each { |taxon| add_taxon(product, taxon, '功能') }    if mobile.functions && !mobile.functions.strip.empty?
   mobile.style.strip.split(',').each     { |taxon| add_taxon(product, taxon, '样式') }    if mobile.style && !mobile.style.strip.empty?
-  mobile.os.strip.split(',').each        { |taxon| add_taxon(product, taxon, '操作系统') } if mobile.os && !mobile.os.strip.empty?
 end
 def add_taxon(product, taxon_name, taxonomy_name)
   @parent_taxons ||= {}
