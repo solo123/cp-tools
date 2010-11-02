@@ -7,6 +7,7 @@ def process_model(path, brand, model)
   Dir[path + '/' + brand + '/' + model + '/*.jpg'].each do |f|
     begin
      Image.create(:attachment => File.open(f), :viewable => p)
+     File.delete f
     rescue
      printf " (Invalid image:" << f << ")"
     end
