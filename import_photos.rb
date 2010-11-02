@@ -1,4 +1,6 @@
 #!/usr/bin/ruby
+require 'rubygems'
+require 'fileutils'
 require '../data/products.rb'
 
 def process_model(path, brand, model)
@@ -12,6 +14,7 @@ def process_model(path, brand, model)
      printf " (Invalid image:" << f << ")"
     end
   end
+  ( FileUtils.rmdir path + '/' + brand + '/' + model  rescue print ' <rm error> ' )
 end
 
 if ARGV.length < 1
@@ -32,16 +35,14 @@ if Dir[path].length > 0
     puts "\n---- 开始导入图片 ----"
     Dir.entries(path).each do |p|
       next if p[0] == ?.
-      puts ''
-      print p
-      print ': '
+      puts '>> ' + p + ':'
 
       Dir.entries(path + '/' + p).each do |m|
         next if m[0] == ?.
-        print m
+        puts '   - ' + m
         process_model(path, p, m)
-        print ', '
       end
+      ( FileUtils.rmdir path + '/' + p rescue print ' (rm error) ' )
     end
   puts "\n---- END ----"
   end
