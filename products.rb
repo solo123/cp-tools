@@ -5,7 +5,7 @@ class ProductHelper
 
   def find_or_create(brand, model)
     @count += 1
-    p = Product.in_taxon(brand).with_property_value("型号",model)
+    p = Product.not_deleted.in_taxon(brand).with_property_value("型号",model)
     return p[0] if p.count > 0
 
     p = Product.create \

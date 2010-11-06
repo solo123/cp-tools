@@ -56,8 +56,12 @@ def send_by_cm(mobile, content)
 end
 
 def get_new_messages
+  begin
    resp = Net::HTTP.get_response(URI.parse(@@base_url + 'get_new_messages'))
    JSON.parse(resp.body)
+  rescue
+    []
+  end
 end
 
 def retrieve_data
