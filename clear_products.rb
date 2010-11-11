@@ -66,9 +66,19 @@ def available_by_quote
     end
   end
 end
+def image_resize
+  print 'Start id: '
+  c = gets.chomp.to_i
+  Product.active.all(:conditions => 'id>' + c.to_s, :order => 'id').each do |p|
+    if p.images.length > 0
+      p.images.first.attachment.reprocess!
+      puts "#{p.id}) #{p.name}"
+    end
+  end
+end
 
 loop do
-  print '0)quit 1)格式化产品名称, 2)按上市日期清理 3)清空产品回收站 4)无报价下架'
+  print '0)quit 1)格式化产品名称, 2)按上市日期清理 3)清空产品回收站 4)无报价下架 5)Image resize'
   k = gets.chomp.upcase[0]
   if k == ?0
     break
@@ -80,5 +90,7 @@ loop do
     purge_product
   elsif k == ?4
     available_by_quote
+  elsif k == ?5
+    image_resize
   end
 end
