@@ -77,8 +77,22 @@ def image_resize
   end
 end
 
+def update_brand_model
+  t = Taxonomy.find_by_name('品牌').id
+  Product.not_deleted.each do |p|
+    unless p.brand_id
+      p.brand_id = p.taxons.find_by_taxonomy_id(t)
+      p.model = p.property('型号')
+      p.list_date = p.property('上市日期')
+      p.save!
+      puts "#{p.id}) #{p.name} - #{p.list_date}"
+    end
+  end
+end
+
 loop do
-  print '0)quit 1)格式化产品名称, 2)按上市日期清理 3)清空产品回收站 4)无报价下架 5)Image resize'
+  print "0)quit 1)格式化产品名称, 2)按上市日期清理 3)清空产品回收站 4)无报价下架 5)Image resize\n" +
+      "6)产品品牌型号"
   k = gets.chomp.upcase[0]
   if k == ?0
     break
@@ -92,5 +106,7 @@ loop do
     available_by_quote
   elsif k == ?5
     image_resize
+  elsif k == ?6
+    update_brand_model
   end
 end
