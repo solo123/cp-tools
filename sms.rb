@@ -50,10 +50,7 @@ class Sms
   end
 end
 
-def send_by_cm(mobile, content)
-  @@srv_cm ||= SOAP::WSDLDriverFactory.new("http://61.144.195.169/cminterface/gsmmodem/sendsms.asmx?WSDL").create_rpc_driver
-  @@srv_cm.SendSMS(:sender => "KUGOU", :mobile => mobile, :msg	=> content, :needreport => '0', :ischinese => '1')
-end
+
 
 def get_new_messages
   begin
@@ -94,8 +91,13 @@ def send_sms
     puts '----------'
   end
 end
+def send_by_cm(mobile, content)
+  @@srv_cm ||= SOAP::WSDLDriverFactory.new("http://61.144.195.169/cminterface/gsmmodem/sendsms.asmx?WSDL").create_rpc_driver
+  @@srv_cm.SendSMS(:sender => "KUGOU", :mobile => mobile, :msg	=> content, :needreport => '0', :ischinese => '1')
+end
 def send_sms_by_hyt
   Msg.all(:conditions => 'status=0 and msg_type="SMS"').each do |msg|
+    @@sms ||= Sms.new
     @@sms.send(msg.address, msg.msg_body)
 
     msg.status = 1
@@ -195,7 +197,7 @@ end
 
 
 @@base_url = 'http://www.coolpur.com/etl/'
-@@sms = Sms.new
+#@@sms = Sms.new
 while 1 do
   system('clear')
   print 'R:read messages, S:send, U:update status, B:balance, A:auto, C:auto(CM), Q:quit'

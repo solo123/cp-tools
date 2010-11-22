@@ -89,10 +89,26 @@ def update_brand_model
     end
   end
 end
+def clear_dup
+  p_id = 0
+  b_id = 0
+  md = nil
+  Product.not_deleted.order(:brand_id, :model).each do |p|
+    if (p.brand_id == b_id) && (p.model == md) && (p.id != p_id)
+      p.deleted_at = Time.now
+      p.save
+      puts "delete:[#{p_id},#{p.id}] #{p.name}"
+    else
+      p_id = p.id
+      b_id = p.brand_id
+      md = p.model
+    end
+  end
+end
 
 loop do
   print "0)quit 1)格式化产品名称, 2)按上市日期清理 3)清空产品回收站 4)无报价下架 5)Image resize\n" +
-      "6)产品品牌型号"
+      "6)产品品牌型号 7)清理重复产品"
   k = gets.chomp.upcase[0]
   if k == ?0
     break
@@ -108,5 +124,7 @@ loop do
     image_resize
   elsif k == ?6
     update_brand_model
+  elsif k == ?7
+    clear_dup
   end
 end
