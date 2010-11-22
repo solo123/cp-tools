@@ -78,10 +78,14 @@ def image_resize
 end
 
 def update_brand_model
+  print 'force update? (y/n)'
+  not_force = (gets.chomp.upcase[0] == ?N)
   t = Taxonomy.find_by_name('品牌').id
   Product.not_deleted.each do |p|
-    unless p.brand_id
-      p.brand_id = p.taxons.find_by_taxonomy_id(t)
+    next if not_force && p.brand_id
+    bnd = p.taxons.find_by_taxonomy_id(t)
+    if bnd
+      p.brand_id = bnd.id
       p.model = p.property('型号')
       p.list_date = p.property('上市日期')
       p.save!
