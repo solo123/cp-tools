@@ -17,7 +17,7 @@ class SmsDB < ActiveRecord::Base
 end
 class Msg < SmsDB
   def to_s
-    self.id.to_s + ') ' + self.address + ' ' + self.sendee + ' : ' + self.created_at.strftime("%Y-%m-%d %H:%M")
+    "#{self.id}) #{self.address} #{self.sendee} : #{self.created_at.strftime("%Y-%m-%d %H:%M")}"
   end
 end
 
@@ -62,19 +62,19 @@ def get_new_messages
 end
 
 def retrieve_data
-  msgs = get_new_messages
-  msgs.each do |msg|
-    op = '[NEW] '
-    m = Msg.new
-    msg["msg"].to_a.each {|k,v| m[k] = v}
-    if Msg.find_by_id(m.id)
-      op = '[skip] '
-    else
-      m.save
+    msgs = get_new_messages
+    msgs.each do |msg|
+      op = '[NEW] '
+      m = Msg.new
+      msg["msg"].to_a.each {|k,v| m[k] = v}
+      if Msg.find_by_id(m.id)
+        op = '[skip] '
+      else
+        m.save
+      end
+      puts op + m.to_s
     end
-    puts op + m.to_s
-  end
-  msgs.count
+    msgs.count
 end
 
 def send_sms

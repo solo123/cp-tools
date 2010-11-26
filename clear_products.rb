@@ -82,15 +82,18 @@ def update_brand_model
   not_force = (gets.chomp.upcase[0] == ?N)
   t = Taxonomy.find_by_name('品牌').id
   Product.not_deleted.each do |p|
-    next if not_force && p.brand_id
+    next if not_force && p.brand_id && p.model
     bnd = p.taxons.find_by_taxonomy_id(t)
     if bnd
       p.brand_id = bnd.id
-      p.model = p.property('型号')
-      p.list_date = p.property('上市日期')
-      p.save!
-      puts "#{p.id}) #{p.name} - #{p.list_date}"
+    else
+      p.brand_id = nil
+      p.deleted_at = Time.now
     end
+    p.model = p.property('型号')
+    p.list_date = p.property('上市日期')
+    p.save!
+    puts "#{p.id}) #{p.name} - #{p.list_date}"
   end
 end
 def clear_dup
@@ -109,10 +112,24 @@ def clear_dup
     end
   end
 end
+def reset_model
+  cnt = 0
+  Product.where('deleted_at is not null').each do |p|
+    brand = p.name.split(' ')[0]
+    next if !brand || brand.length < 1
+    t = Taxon.find_by_name(brand)
+    next unless t
+    p.brand_id = t.id
+    p.deleted_at = nil
+    p.save!
+    cnt += 1
+    puts "#{cnt}) #{p.name}"
+  end
+end
 
 loop do
   print "0)quit 1)格式化产品名称, 2)按上市日期清理 3)清空产品回收站 4)无报价下架 5)Image resize\n" +
-      "6)产品品牌型号 7)清理重复产品"
+      "6)产品品牌型号 7)清理重复产品 8)reset model"
   k = gets.chomp.upcase[0]
   if k == ?0
     break
@@ -130,5 +147,7 @@ loop do
     update_brand_model
   elsif k == ?7
     clear_dup
+  elsif k == ?8
+    reset_model
   end
 end
