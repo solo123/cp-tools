@@ -8,7 +8,9 @@ def user_log_count(uid)
 end
 def one_result_query(sql)
   r = ActiveRecord::Base.connection.execute(sql)
-  r.fetch_row[0]
+  r.each do |row|
+    return row[0]
+  end
 end
 
 f = File.new("status.txt",'w')
@@ -24,9 +26,12 @@ f.puts "客户数: " + User.count.to_s + "(有登录过：#{User.all(:conditions
 um = UserManager.all(:group => 'employee_id', :select => 'count(*) as cnt, employee_id')
 tot = 0
 um.each do |u|
-  f.puts "        " + User.find_by_id(u.employee_id).display_name + "\t" + u.cnt.to_s \
-    + " (有登录过:#{user_reg_count(u.employee_id)}, 活动客户:#{user_log_count(u.employee_id)})"
-  tot = tot + u.cnt.to_i
+  usr = User.find_by_id(u.employee_id)
+  if usr
+    f.puts "        " + User.find_by_id(u.employee_id).display_name + "\t" + u.cnt.to_s \
+      + " (有登录过:#{user_reg_count(u.employee_id)}, 活动客户:#{user_log_count(u.employee_id)})"
+    tot = tot + u.cnt.to_i
+  end
 end
 f.puts "        tot: " + tot.to_s
 
