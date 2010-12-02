@@ -1,11 +1,9 @@
 #!/usr/bin/ruby
 require 'rubygems'
 require 'fileutils'
-require '../data/products.rb'
 
 def process_model(path, brand, model)
-  @pt ||= ProductHelper.new
-  p = @pt.find_or_create(brand, model)
+  p = Mobile.find_or_create(brand, model)
   Dir[path + '/' + brand + '/' + model + '/*.{jpg,png,gif}'].each do |f|
     begin
      Image.create(:attachment => File.open(f), :viewable => p)

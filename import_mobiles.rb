@@ -1,36 +1,6 @@
 class Mobile < ActiveRecord::Base
 end
 
-def find_or_create(brand_name, model)
-  @taxonomy_id ||= Taxonomy.find_by_name('品牌').id
-  brand = Taxon.find_by_name_and_taxonomy_id(brand_name, @taxonomy_id)
-  unless brand
-    @brand_china ||= Taxon.find_by_name('国内品牌').id
-
-    brand = Taxon.new(:name => brand_name, :taxonomy_id => @taxonomy_id, :parent_id => @brand_china)
-    brand.save!
-    print " *new brand:#{brand_name} "
-  end
-  product = nil
-  ps = Product.in_taxon(brand).with_property_value("型号", model)
-  if ps.length > 0
-    product = Product.find_by_id(ps[0].id)
-  else
-    product = Product.create \
-			:name => brand_name + " " + model,
-			:price => 0,
-			:description => '',
-			:available_on => Time.now
-
-		product.taxons << brand
-    @prop_model ||= Property.find_by_name("型号", "型号")
-		ProductProperty.create :property => @prop_model, :product => product, :value => model
-    print " *new model:#{model} "
-  end
-  print "(pid:#{product.id}) "
-  product
-end
-
 def update_properties(product, mobile)
   @props ||= [
     ['screen','屏幕'], ['color','颜色'], ['standard','标配'], ['os','操作系统'],
