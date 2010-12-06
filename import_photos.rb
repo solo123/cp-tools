@@ -3,7 +3,7 @@ require 'rubygems'
 require 'fileutils'
 
 def process_model(path, brand, model)
-  p = Mobile.find_or_create(brand, model)
+  p = MobileHelper.find_or_create(brand, model)
   Dir[path + '/' + brand + '/' + model + '/*.{jpg,png,gif}'].each do |f|
     begin
      Image.create(:attachment => File.open(f), :viewable => p)

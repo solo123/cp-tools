@@ -15,8 +15,20 @@ def reload_product
   end
 end
 
+puts <<EOF
+insert into model_alias
+(product_id, brand_id, model)
+select id, brand_id, model from products where products.deleted_at is null
 
+delete from model_alias where model is null
 
+select brand_id, model, count(*) as cnt
+from model_alias
+group by brand_id, model
+order by brand_id, model
+having cnt > 1
+
+EOF
 
 print "r)Product->alias"
 k = gets.chomp.upcase[0]
