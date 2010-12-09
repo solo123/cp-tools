@@ -127,9 +127,14 @@ def reset_model
   end
 end
 
+def reset_catalog
+  Product.update_all('tax_category_id=1', 'tax_category_id is null')
+  Product.update_all('shipping_category_id=1', 'shipping_category_id is null')
+end
+
 loop do
   print "0)quit 1)格式化产品名称, 2)按上市日期清理 3)清空产品回收站 4)无报价下架 5)Image resize\n" +
-      "6)产品品牌型号 7)清理重复产品 8)reset model"
+      "6)产品品牌型号 7)清理重复产品 8)reset model 9)设置价格类别"
   k = gets.chomp.upcase[0]
   if k == ?0
     break
@@ -149,5 +154,7 @@ loop do
     clear_dup
   elsif k == ?8
     reset_model
+  elsif k == ?9
+    reset_catalog
   end
 end
