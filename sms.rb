@@ -17,7 +17,11 @@ class SmsDB < ActiveRecord::Base
 end
 class Msg < SmsDB
   def to_s
-    "#{self.id}) #{self.address} #{self.sendee} : #{self.created_at.strftime("%Y-%m-%d %H:%M")}"
+    if self.sendee
+      "#{self.id}) #{self.address} #{self.sendee} : #{self.created_at.strftime("%Y-%m-%d %H:%M")}"
+    else
+      "#{self.id}) #{self.address} "
+    end
   end
 end
 
@@ -121,10 +125,10 @@ end
 
 def update_status
   ids1 = []
-  Msg.all(:conditions => 'status=0').each {|msg| ids1 <<  msg.id}
+  Msg.all(:conditions => 'status=0 and sendee is not null').each {|msg| ids1 <<  msg.id}
 
   ids2 = []
-  Msg.all(:conditions => 'status=1').each {|msg| ids2 <<  msg.id}
+  Msg.all(:conditions => 'status=1 and sendee is not null').each {|msg| ids2 <<  msg.id}
 
   res = Net::HTTP.post_form(URI.parse(@@base_url + 'update_messages_status'), {'s1' => ids1.join(','), 's2' => ids2.join(',')})
   puts res.body
