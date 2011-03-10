@@ -8,3 +8,4 @@ recv
 *.tar.gz
 2010*
 icon
+.project
